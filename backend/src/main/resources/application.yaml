@@ -1,3 +1,18 @@
 spring:
   application:
     name: backend
+  
+  config:
+    import: optional:file:../.env[.properties],optional:file:.env[.properties]
+
+  r2dbc:
+    url: r2dbc:postgresql://${POSTGRES_DATABASE_HOST}:${POSTGRES_DATABASE_PORT}/${POSTGRES_DATABASE_NAME}
+    username: ${POSTGRES_DATABASE_USER}
+    password: ${POSTGRES_DATABASE_PASSWORD}
+  sql:
+    init:
+      mode: always
+
+  ai:
+    openai:
+      api-key: ${GEMINI_API_KEY}
