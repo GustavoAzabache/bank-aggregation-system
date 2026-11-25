@@ -1,0 +1,52 @@
+name: Java CI/CD con Spring Boot
+
+# 1. ¿Cuándo se ejecuta? Al hacer push a tu rama o abrir un Pull Request
+on:
+  push:
+    branches: [ "main", "develop", "feat/*" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    # 2. Levanta un contenedor limpio con Ubuntu desde cero
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bank_aggregation_system
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    # Paso 3: Clona tu código dentro del contenedor de GitHub
+    - name: Clonar el repositorio
+      uses: actions/checkout@v4
+
+    # Paso 4: Instala Java 25 (según la versión que use tu pom.xml)
+    - name: Configurar JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: maven # Guarda en caché tus dependencias para que el próximo push sea más rápido
+        cache-dependency-path: backend/pom.xml
+
+    # Paso 5: Da permisos de ejecución al wrapper de Maven (vive en backend-/)
+    - name: Dar permisos a Maven Wrapper
+      working-directory: backend
+      run: chmod +x mvnw
+
+    # Paso 6: Compila el código y ejecuta TODOS tus tests
+    - name: Ejecutar Tests Unitarios con Maven
+      working-directory: backend
+      run: ./mvnw clean test

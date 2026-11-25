@@ -1,18 +1,25 @@
 spring:
   application:
     name: backend
-  
+
   config:
     import: optional:file:../.env[.properties],optional:file:.env[.properties]
 
   r2dbc:
-    url: r2dbc:postgresql://${POSTGRES_DATABASE_HOST}:${POSTGRES_DATABASE_PORT}/${POSTGRES_DATABASE_NAME}
-    username: ${POSTGRES_DATABASE_USER}
-    password: ${POSTGRES_DATABASE_PASSWORD}
-  sql:
-    init:
-      mode: always
+    url: r2dbc:postgresql://${POSTGRES_DATABASE_HOST:localhost}:${POSTGRES_DATABASE_PORT:5432}/${POSTGRES_DATABASE_NAME:bank_aggregation_system}
+    username: ${POSTGRES_DATABASE_USER:postgres}
+    password: ${POSTGRES_DATABASE_PASSWORD:postgres}
+
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://${POSTGRES_DATABASE_HOST:localhost}:${POSTGRES_DATABASE_PORT:5432}/${POSTGRES_DATABASE_NAME:bank_aggregation_system}
+    user: ${POSTGRES_DATABASE_USER:postgres}
+    password: ${POSTGRES_DATABASE_PASSWORD:postgres}
+    locations: classpath:db/migration
 
   ai:
     openai:
-      api-key: ${GEMINI_API_KEY}
+      api-key: ${GEMINI_API_KEY:dummy-key-for-ci}
+      base-url: https://generativelanguage.googleapis.com/v1beta/openai
+      chat:
+        model: gemini-2.5-flash
